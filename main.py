@@ -5,8 +5,6 @@ import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
 
-# import sys
-# sys.path.insert(1, '/Users/darren/Desktop/C4222/GMAN')
 from utils.utils_ import log_string, plot_train_val_loss
 from utils.utils_ import count_parameters, load_data
 
