@@ -1,3 +1,8 @@
+import sys
+import os
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.insert(0, parent_dir)
+
 import time
 import datetime
 from utils.utils_ import log_string

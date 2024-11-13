@@ -3,6 +3,11 @@ import time
 import math
 import numpy as np
 
+import sys
+import os
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.insert(0, parent_dir)
+
 # Import the functions from the utils folder
 from utils.utils_ import log_string, metric
 from utils.utils_ import load_data
