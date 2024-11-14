@@ -7,3 +7,7 @@ mean:   62.7354		std:   9.4388
 data loaded!
 compiling model...
 trainable parameters: 209,923
+**** testing model ****
+loading model from ./data/GMAN.pkl
+model restored!
+evaluating...
