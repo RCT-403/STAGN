@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
+from sklearn.decomposition import PCA
 
 
 class conv2d_(nn.Module):
@@ -64,17 +65,17 @@ class STEmbedding(nn.Module):
     TE:     [batch_size, num_his + num_pred, 2] (dayofweek, timeofday)
     T:      num of time steps in one day
     D:      output dims
-    retrun: [batch_size, num_his + num_pred, num_vertex, D]
+    return: [batch_size, num_his + num_pred, num_vertex, D]
     '''
 
     def __init__(self, D, bn_decay):
         super(STEmbedding, self).__init__()
         self.FC_se = FC(
-            input_dims=[D, D], units=[D, D], activations=[F.relu, None],
+            input_dims=[D, 52], units=[52, 52], activations=[F.relu, None],
             bn_decay=bn_decay)
 
         self.FC_te = FC(
-            input_dims=[295, D], units=[D, D], activations=[F.relu, None],
+            input_dims=[295, 12], units=[12, 12], activations=[F.relu, None],
             bn_decay=bn_decay)  # input_dims = time step per day + days per week=288+7=295
 
     def forward(self, SE, TE, T=288):
@@ -93,8 +94,16 @@ class STEmbedding(nn.Module):
         TE = self.FC_te(TE)
         del dayofweek, timeofday
 
-        # Change this!! :D
-        return SE + TE
+        SE_expanded = SE.expand(32, 24, 325, 52)
+        TE_expanded = TE.expand(32, 24, 325, 12)
+        
+        # reshaped_tensor = torch.cat((SE_expanded, TE_expanded), dim=3).detach().view(-1, 128).numpy()
+        # pca = PCA(n_components=64)
+        # SEMan = pca.fit_transform(reshaped_tensor)
+        # SEMan = torch.from_numpy(SEMan).view(32, 24, 325, 64)
+        # return SEMan
+
+        return torch.cat((SE_expanded, TE_expanded), dim=3)
 
 
 class spatialAttention(nn.Module):

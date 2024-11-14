@@ -37,7 +37,7 @@ parser.add_argument('--max_epoch', type=int, default=1,
                     help='epoch to run')
 parser.add_argument('--patience', type=int, default=2,
                     help='patience for early stop') # 10
-parser.add_argument('--learning_rate', type=float, default=0.001,
+parser.add_argument('--learning_rate', type=float, default=0.01,
                     help='initial learning rate')
 parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
