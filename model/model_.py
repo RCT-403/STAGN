@@ -92,6 +92,8 @@ class STEmbedding(nn.Module):
         TE = TE.unsqueeze(dim=2)
         TE = self.FC_te(TE)
         del dayofweek, timeofday
+
+        # Change this!! :D
         return SE + TE
 
 

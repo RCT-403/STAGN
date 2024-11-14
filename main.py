@@ -22,9 +22,9 @@ parser.add_argument('--num_pred', type=int, default=12,
 parser.add_argument('--L', type=int, default=1,
                     help='number of STAtt Blocks')
 parser.add_argument('--K', type=int, default=8,
-                    help='number of attention heads')
+                    help='number of attention heads') # 8
 parser.add_argument('--d', type=int, default=8,
-                    help='dims of each head attention outputs')
+                    help='dims of each head attention outputs') # 8
 parser.add_argument('--train_ratio', type=float, default=0.7,
                     help='training set [default : 0.7]')
 parser.add_argument('--val_ratio', type=float, default=0.1,
@@ -35,8 +35,8 @@ parser.add_argument('--batch_size', type=int, default=32,
                     help='batch size')
 parser.add_argument('--max_epoch', type=int, default=1,
                     help='epoch to run')
-parser.add_argument('--patience', type=int, default=10,
-                    help='patience for early stop')
+parser.add_argument('--patience', type=int, default=2,
+                    help='patience for early stop') # 10
 parser.add_argument('--learning_rate', type=float, default=0.001,
                     help='initial learning rate')
 parser.add_argument('--decay_epoch', type=int, default=10,
