@@ -186,7 +186,7 @@ class temporalAttention(nn.Module):
         D = K * d
         self.d = d
         self.K = K
-        self.M = 5
+        
         self.mask = mask
         self.FC_q = FC(input_dims=2 * D, units=D, activations=F.relu,
                        bn_decay=bn_decay)
@@ -221,15 +221,14 @@ class temporalAttention(nn.Module):
         key = key.permute(0, 2, 3, 1)
         value = value.permute(0, 2, 1, 3)
         
+        query = AddClusterTemporal(query) # [256, 325, 12, 8] -> [256, 325, 60, 8]
+        value = AddClusterTemporal(value) 
         # We create a new key which concats 5 permutations of X
         # we get Q = [256, 325, 60, 8] and K = [256, 325, 8, 12]
-        
         
         # [K * batch_size, num_vertex, num_step, num_step]
         attention = torch.matmul(query, key)
         attention /= (self.d ** 0.5)
-        print('8')
-        print(attention.shape)
         # we want A = [256, 325, 60, 12]
         
         
@@ -246,24 +245,19 @@ class temporalAttention(nn.Module):
             attention = torch.where(mask, attention, -2 ** 15 + 1)
         
         # softmax
-        attention = F.softmax(attention, dim=-1)
+        attention = F.softmax(attention, dim=-2)
         
         # [batch_size, num_step, num_vertex, D]
-        print('9')
-        print(attention.shape)
-        # we want A = [256, 325, 60, 12]
-        print(value.shape)
-        # We want to change V to [256, 325, 8, 60]
+        attention = attention.permute(0,1,3,2)
+        
+        # we want A = [256, 325, 12, 60]
+        # We want to change V to [256, 325, 60, 8]
         # We apply the same permutation we did to key except its in 3rd dim
         
         X = torch.matmul(attention, value)
-        print(X.shape)
         X = X.permute(0, 2, 1, 3)
-        print(X.shape)
         X = torch.cat(torch.split(X, batch_size_, dim=0), dim=-1)  # orginal K, change to batch_size
-        print(X.shape)
         X = self.FC(X)
-        print(X.shape)
         del query, key, value, attention
         return X
 
