@@ -25,11 +25,11 @@ parser.add_argument('--K', type=int, default=8,
                     help='number of attention heads') # 8
 parser.add_argument('--d', type=int, default=8,
                     help='dims of each head attention outputs') # 8
-parser.add_argument('--train_ratio', type=float, default=0.7,
+parser.add_argument('--train_ratio', type=float, default=0.05,
                     help='training set [default : 0.7]')
-parser.add_argument('--val_ratio', type=float, default=0.1,
+parser.add_argument('--val_ratio', type=float, default=0.05,
                     help='validation set [default : 0.1]')
-parser.add_argument('--test_ratio', type=float, default=0.2,
+parser.add_argument('--test_ratio', type=float, default=0.05,
                     help='testing set [default : 0.2]')
 parser.add_argument('--batch_size', type=int, default=64,
                     help='batch size')
