@@ -5,10 +5,12 @@ def equal_size_kmeans(X, k):
     size = points / k
     # Step 1: Initialize the centroids
     centroids = np.random.rand(k, X.shape[1])
-    cluster_assignments = np.full(X.shape[0], -1) 
-    cluster_sizes = np.zeros(k, dtype=int)
 
     for _ in range(1):
+
+        cluster_assignments = np.full(X.shape[0], -1) 
+        cluster_sizes = np.zeros(k, dtype=int)
+
         for i in range(points):
             cluster_assignments[i] = np.argmax(np.matmul(X[i], centroids.T))
             cluster_sizes[cluster_assignments[i]] += 1
@@ -29,5 +31,5 @@ def equal_size_kmeans(X, k):
         
         for i in range(k):
             centroids[i] = np.mean(X[cluster_assignments == i].numpy(), axis = 0, keepdims= True)
-    
+
     return cluster_assignments
