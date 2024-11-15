@@ -5,6 +5,19 @@ import math
 from sklearn.decomposition import PCA
 
 
+def AddClusterTemporal(INPUT): # [256, 325, 12, 8] -> [256, 325, 60, 8]
+    
+    # STILL NEED TO ADD GROUPING THEN ARRANGE THE GROUPING
+    
+    X = [torch.split(INPUT[i], 5, dim=0) for i in range(256)]
+    X = [list(split) for split in X]
+    X = [[t.reshape(-1, t.size(-1)) for t in X[i]] for i in range(256)]
+    X = [[t for t in X[i] for _ in range(5)] for i in range(256)]
+    X = torch.stack([torch.stack(t) for t in X])
+    return X
+
+    # STILL NEED TO ADD THE GROUPING THEN ARRANGE FROM GROUPED TO NORMAL
+
 class conv2d_(nn.Module):
     def __init__(self, input_dims, output_dims, kernel_size, stride=(1, 1),
                  padding='SAME', use_bias=True, activation=F.relu,
