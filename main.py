@@ -31,13 +31,13 @@ parser.add_argument('--val_ratio', type=float, default=0.1,
                     help='validation set [default : 0.1]')
 parser.add_argument('--test_ratio', type=float, default=0.2,
                     help='testing set [default : 0.2]')
-parser.add_argument('--batch_size', type=int, default=32,
+parser.add_argument('--batch_size', type=int, default=64,
                     help='batch size')
 parser.add_argument('--max_epoch', type=int, default=1,
                     help='epoch to run')
 parser.add_argument('--patience', type=int, default=2,
                     help='patience for early stop') # 10
-parser.add_argument('--learning_rate', type=float, default=0.01,
+parser.add_argument('--learning_rate', type=float, default=0.001,
                     help='initial learning rate')
 parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
