@@ -71,7 +71,7 @@ class STEmbedding(nn.Module):
     def __init__(self, D, bn_decay):
         super(STEmbedding, self).__init__()
         self.FC_se = FC(
-            input_dims=[D, 52], units=[52, 52], activations=[F.relu, None],
+            input_dims=[52, 52], units=[52, 52], activations=[F.relu, None],
             bn_decay=bn_decay)
 
         self.FC_te = FC(

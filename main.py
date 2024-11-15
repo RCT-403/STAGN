@@ -43,7 +43,7 @@ parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
 parser.add_argument('--traffic_file', default='./data/pems-bay.h5',
                     help='traffic file')
-parser.add_argument('--SE_file', default='./data/SE(PeMS).txt',
+parser.add_argument('--SE_file', default='./data/SE(PeMS)_52.txt',
                     help='spatial embedding file')
 parser.add_argument('--model_file', default='./data/GMAN.pkl',
                     help='save the model to disk')
