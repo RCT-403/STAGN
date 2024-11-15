@@ -25,11 +25,11 @@ parser.add_argument('--K', type=int, default=8,
                     help='number of attention heads') # 8
 parser.add_argument('--d', type=int, default=8,
                     help='dims of each head attention outputs') # 8
-parser.add_argument('--train_ratio', type=float, default=0.7,
+parser.add_argument('--train_ratio', type=float, default=0.05,
                     help='training set [default : 0.7]')
-parser.add_argument('--val_ratio', type=float, default=0.1,
+parser.add_argument('--val_ratio', type=float, default=0.05,
                     help='validation set [default : 0.1]')
-parser.add_argument('--test_ratio', type=float, default=0.2,
+parser.add_argument('--test_ratio', type=float, default=0.05,
                     help='testing set [default : 0.2]')
 parser.add_argument('--batch_size', type=int, default=32,
                     help='batch size')
@@ -43,7 +43,7 @@ parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
 parser.add_argument('--traffic_file', default='./data/pems-bay.h5',
                     help='traffic file')
-parser.add_argument('--SE_file', default='./data/SE(PeMS).txt',
+parser.add_argument('--SE_file', default='./data/SE(PeMS)_52.txt',
                     help='spatial embedding file')
 parser.add_argument('--model_file', default='./data/GMAN.pkl',
                     help='save the model to disk')

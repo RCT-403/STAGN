@@ -2,7 +2,21 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
+from sklearn.decomposition import PCA
 
+
+def AddClusterTemporal(INPUT): # [256, 325, 12, 8] -> [256, 325, 60, 8]
+    
+    # STILL NEED TO ADD GROUPING THEN ARRANGE THE GROUPING
+    
+    X = [torch.split(INPUT[i], 5, dim=0) for i in range(256)]
+    X = [list(split) for split in X]
+    X = [[t.reshape(-1, t.size(-1)) for t in X[i]] for i in range(256)]
+    X = [[t for t in X[i] for _ in range(5)] for i in range(256)]
+    X = torch.stack([torch.stack(t) for t in X])
+    return X
+
+    # STILL NEED TO ADD THE GROUPING THEN ARRANGE FROM GROUPED TO NORMAL
 
 class conv2d_(nn.Module):
     def __init__(self, input_dims, output_dims, kernel_size, stride=(1, 1),
@@ -14,8 +28,7 @@ class conv2d_(nn.Module):
             self.padding_size = math.ceil(kernel_size)
         else:
             self.padding_size = [0, 0]
-        self.conv = nn.Conv2d(input_dims, output_dims, kernel_size, stride=stride,
-                              padding=0, bias=use_bias)
+        self.conv = nn.Conv2d(input_dims, output_dims, kernel_size, stride=stride,padding=0, bias=use_bias)
         self.batch_norm = nn.BatchNorm2d(output_dims, momentum=bn_decay)
         torch.nn.init.xavier_uniform_(self.conv.weight)
 
@@ -64,17 +77,17 @@ class STEmbedding(nn.Module):
     TE:     [batch_size, num_his + num_pred, 2] (dayofweek, timeofday)
     T:      num of time steps in one day
     D:      output dims
-    retrun: [batch_size, num_his + num_pred, num_vertex, D]
+    return: [batch_size, num_his + num_pred, num_vertex, D]
     '''
 
     def __init__(self, D, bn_decay):
         super(STEmbedding, self).__init__()
         self.FC_se = FC(
-            input_dims=[D, D], units=[D, D], activations=[F.relu, None],
+            input_dims=[52, 52], units=[52, 52], activations=[F.relu, None],
             bn_decay=bn_decay)
 
         self.FC_te = FC(
-            input_dims=[295, D], units=[D, D], activations=[F.relu, None],
+            input_dims=[295, 12], units=[12, 12], activations=[F.relu, None],
             bn_decay=bn_decay)  # input_dims = time step per day + days per week=288+7=295
 
     def forward(self, SE, TE, T=288):
@@ -93,8 +106,16 @@ class STEmbedding(nn.Module):
         TE = self.FC_te(TE)
         del dayofweek, timeofday
 
-        # Change this!! :D
-        return SE + TE
+        SE_expanded = SE.expand(TE.shape[0], 24, 325, 52)
+        TE_expanded = TE.expand(TE.shape[0], 24, 325, 12)
+        
+        # reshaped_tensor = torch.cat((SE_expanded, TE_expanded), dim=3).detach().view(-1, 128).numpy()
+        # pca = PCA(n_components=64)
+        # SEMan = pca.fit_transform(reshaped_tensor)
+        # SEMan = torch.from_numpy(SEMan).view(32, 24, 325, 64)
+        # return SEMan
+
+        return torch.cat((SE_expanded, TE_expanded), dim=3)
 
 
 class spatialAttention(nn.Module):
@@ -124,19 +145,25 @@ class spatialAttention(nn.Module):
     def forward(self, X, STE):
         batch_size = X.shape[0]
         X = torch.cat((X, STE), dim=-1)
-        # [batch_size, num_step, num_vertex, K * d]
+        # [batch_size, num_step, num_vertex, K * d + D (from STE)]
         query = self.FC_q(X)
         key = self.FC_k(X)
         value = self.FC_v(X)
+        # FC turned from 2D to D not 'd'
         # [K * batch_size, num_step, num_vertex, d]
+        
         query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
         key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
         value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
+        
         # [K * batch_size, num_step, num_vertex, num_vertex]
-        attention = torch.matmul(query, key.transpose(2, 3))
+        test = key.transpose(2,3)
+        attention = torch.matmul(query, key.transpose(2, 3)) 
         attention /= (self.d ** 0.5)
         attention = F.softmax(attention, dim=-1)
         # [batch_size, num_step, num_vertex, D]
+        
+        # Multiply the attention to the value for the final embedding
         X = torch.matmul(attention, value)
         X = torch.cat(torch.split(X, batch_size, dim=0), dim=-1)  # orginal K, change to batch_size
         X = self.FC(X)
@@ -159,6 +186,7 @@ class temporalAttention(nn.Module):
         D = K * d
         self.d = d
         self.K = K
+        
         self.mask = mask
         self.FC_q = FC(input_dims=2 * D, units=D, activations=F.relu,
                        bn_decay=bn_decay)
@@ -171,26 +199,41 @@ class temporalAttention(nn.Module):
 
     def forward(self, X, STE):
         batch_size_ = X.shape[0]
+        # X - [batch_size, num_step, num_vertex, K * d + D]
         X = torch.cat((X, STE), dim=-1)
-        # [batch_size, num_step, num_vertex, K * d]
+        
+        # q,k,v - [32,12,325,64]
         query = self.FC_q(X)
         key = self.FC_k(X)
         value = self.FC_v(X)
-        # [K * batch_size, num_step, num_vertex, d]
+        
+        # q,k,v - [K * batch_size, num_step, num_vertex, d]
         query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
         key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
         value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
+
         # query: [K * batch_size, num_vertex, num_step, d]
         # key:   [K * batch_size, num_vertex, d, num_step]
         # value: [K * batch_size, num_vertex, num_step, d]
+        # [256, 325, 12, 8]
+        # [256, 325, 8, 12]
         query = query.permute(0, 2, 1, 3)
         key = key.permute(0, 2, 3, 1)
         value = value.permute(0, 2, 1, 3)
+        
+        query = AddClusterTemporal(query) # [256, 325, 12, 8] -> [256, 325, 60, 8]
+        value = AddClusterTemporal(value) 
+        # We create a new key which concats 5 permutations of X
+        # we get Q = [256, 325, 60, 8] and K = [256, 325, 8, 12]
+        
         # [K * batch_size, num_vertex, num_step, num_step]
         attention = torch.matmul(query, key)
         attention /= (self.d ** 0.5)
+        # we want A = [256, 325, 60, 12]
+        
+        
         # mask attention score
-        if self.mask:
+        if self.mask: # not used at the moment
             batch_size = X.shape[0]
             num_step = X.shape[1]
             num_vertex = X.shape[2]
@@ -200,9 +243,17 @@ class temporalAttention(nn.Module):
             mask = mask.repeat(self.K * batch_size, num_vertex, 1, 1)
             mask = mask.to(torch.bool)
             attention = torch.where(mask, attention, -2 ** 15 + 1)
+        
         # softmax
-        attention = F.softmax(attention, dim=-1)
+        attention = F.softmax(attention, dim=-2)
+        
         # [batch_size, num_step, num_vertex, D]
+        attention = attention.permute(0,1,3,2)
+        
+        # we want A = [256, 325, 12, 60]
+        # We want to change V to [256, 325, 60, 8]
+        # We apply the same permutation we did to key except its in 3rd dim
+        
         X = torch.matmul(attention, value)
         X = X.permute(0, 2, 1, 3)
         X = torch.cat(torch.split(X, batch_size_, dim=0), dim=-1)  # orginal K, change to batch_size
@@ -341,7 +392,6 @@ class GMAN(nn.Module):
                        bn_decay=bn_decay)
 
     def forward(self, X, TE):
-
         # input
         X = torch.unsqueeze(X, -1)
         X = self.FC_1(X)

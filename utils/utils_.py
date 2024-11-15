@@ -59,6 +59,7 @@ def load_data(args):
     trainX = (trainX - mean) / std
     valX = (valX - mean) / std
     testX = (testX - mean) / std
+    # The order of the nodes in X is the from 0 to 324 acc to the indices in SE(PeMS)
 
     # spatial embedding
     with open(args.SE_file, mode='r') as f:
@@ -70,6 +71,8 @@ def load_data(args):
             temp = line.split(' ')
             index = int(temp[0])
             SE[index] = torch.tensor([float(ch) for ch in temp[1:]])
+    
+    # SE changes the order of the nodes based on the first col in SE(PeMS)
 
     # temporal embedding
     time = pd.DatetimeIndex(df.index)
