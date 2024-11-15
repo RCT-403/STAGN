@@ -94,8 +94,8 @@ class STEmbedding(nn.Module):
         TE = self.FC_te(TE)
         del dayofweek, timeofday
 
-        SE_expanded = SE.expand(32, 24, 325, 52)
-        TE_expanded = TE.expand(32, 24, 325, 12)
+        SE_expanded = SE.expand(TE.shape[0], 24, 325, 52)
+        TE_expanded = TE.expand(TE.shape[0], 24, 325, 12)
         
         # reshaped_tensor = torch.cat((SE_expanded, TE_expanded), dim=3).detach().view(-1, 128).numpy()
         # pca = PCA(n_components=64)
