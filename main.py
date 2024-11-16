@@ -11,7 +11,6 @@ from utils.utils_ import count_parameters, load_data
 from model.model_ import GMAN
 from model.train import train
 from model.test import test
-import model.kmeansc
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--time_slot', type=int, default=5,
