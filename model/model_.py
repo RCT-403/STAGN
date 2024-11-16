@@ -3,20 +3,78 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 from sklearn.decomposition import PCA
+import numpy as np
 
+def equal_size_kmeans(X, k):
+    points = X.shape[0]
+    size = points / k
+    # Step 1: Initialize the centroids
+    centroids = np.random.rand(k, X.shape[1])
 
-def AddClusterTemporal(INPUT): # [256, 325, 12, 8] -> [256, 325, 60, 8]
+    for _ in range(2):
+
+        cluster_assignments = np.full(X.shape[0], -1) 
+        cluster_sizes = np.zeros(k, dtype=int)
+
+        for i in range(points):
+            cluster_assignments[i] = np.argmax(np.matmul(X[i], centroids.T))
+            cluster_sizes[cluster_assignments[i]] += 1
+        
+        for j in range(k):
+            while cluster_sizes[j] > size:
+                excess_indices = np.where(cluster_assignments == j)[0]
+                if len(excess_indices) == 0:
+                    break
+                excess_index = excess_indices[-1] 
+                cluster_sizes[j] -= 1    
+
+                for m in range(k):
+                    if cluster_sizes[m] < size:
+                        cluster_assignments[excess_index] = m
+                        cluster_sizes[m] += 1
+                        break
+        
+        for i in range(k):
+            centroids[i] = np.mean(X[cluster_assignments == i].numpy(), axis = 0, keepdims= True)
+
+    return cluster_assignments
+
+def AddClusterTemporal(INPUT, grouping): # [256, 325, 12, 8] -> [256, 325, 60, 8]
     
-    # STILL NEED TO ADD GROUPING THEN ARRANGE THE GROUPING
+    # arranged -> output helper
+    count = {}
+    back_to_normal = [] 
+    for index, value in enumerate(grouping):
+        if value.item() not in count:
+            count[value.item()] = 0
+            
+        count[value.item()] += 1
+        k = count[value.item()]  
+        new_value = 5 * (value.item() - 1) + k - 1
+        back_to_normal.append(new_value)
+        
+    # input -> arranged helper
+    transform = []
+    for number in range(65):
+        indices = (grouping == number).nonzero(as_tuple=True)[0]
+        transform.extend(indices.tolist())
     
+    # input -> arranged
+    for i in range(256):
+        INPUT[i] = INPUT[i][transform]
+    
+
     X = [torch.split(INPUT[i], 5, dim=0) for i in range(256)]
     X = [list(split) for split in X]
     X = [[t.reshape(-1, t.size(-1)) for t in X[i]] for i in range(256)]
     X = [[t for t in X[i] for _ in range(5)] for i in range(256)]
     X = torch.stack([torch.stack(t) for t in X])
+    
+    # arranged -> output
+    for i in range(256):
+        X[i] = X[i][back_to_normal]
+    
     return X
-
-    # STILL NEED TO ADD THE GROUPING THEN ARRANGE FROM GROUPED TO NORMAL
 
 class conv2d_(nn.Module):
     def __init__(self, input_dims, output_dims, kernel_size, stride=(1, 1),
@@ -181,9 +239,11 @@ class temporalAttention(nn.Module):
     return: [batch_size, num_step, num_vertex, D]
     '''
 
-    def __init__(self, K, d, bn_decay, mask=True):
+    def __init__(self, K, d, bn_decay, grouping, mask=True):
         super(temporalAttention, self).__init__()
         D = K * d
+        self.grouping = grouping
+        
         self.d = d
         self.K = K
         
@@ -196,6 +256,7 @@ class temporalAttention(nn.Module):
                        bn_decay=bn_decay)
         self.FC = FC(input_dims=D, units=D, activations=F.relu,
                      bn_decay=bn_decay)
+          
 
     def forward(self, X, STE):
         batch_size_ = X.shape[0]
@@ -221,8 +282,8 @@ class temporalAttention(nn.Module):
         key = key.permute(0, 2, 3, 1)
         value = value.permute(0, 2, 1, 3)
         
-        query = AddClusterTemporal(query) # [256, 325, 12, 8] -> [256, 325, 60, 8]
-        value = AddClusterTemporal(value) 
+        query = AddClusterTemporal(query, self.grouping) # [256, 325, 12, 8] -> [256, 325, 60, 8]
+        value = AddClusterTemporal(value, self.grouping) 
         # We create a new key which concats 5 permutations of X
         # we get Q = [256, 325, 60, 8] and K = [256, 325, 8, 12]
         
@@ -291,10 +352,10 @@ class gatedFusion(nn.Module):
 
 
 class STAttBlock(nn.Module):
-    def __init__(self, K, d, bn_decay, mask=False):
+    def __init__(self, K, d, bn_decay, grouping, mask=False):
         super(STAttBlock, self).__init__()
         self.spatialAttention = spatialAttention(K, d, bn_decay)
-        self.temporalAttention = temporalAttention(K, d, bn_decay, mask=mask)
+        self.temporalAttention = temporalAttention(K, d, bn_decay, grouping, mask=mask)
         self.gatedFusion = gatedFusion(K * d, bn_decay)
 
     def forward(self, X, STE):
@@ -380,16 +441,20 @@ class GMAN(nn.Module):
         K = args.K
         d = args.d
         D = K * d
+        
+        grouping = torch.from_numpy(equal_size_kmeans(SE, 65))
+        
         self.num_his = args.num_his
         self.SE = SE
         self.STEmbedding = STEmbedding(D, bn_decay)
-        self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
-        self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
+        self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay, grouping) for _ in range(L)])
+        self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay, grouping) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
         self.FC_1 = FC(input_dims=[1, D], units=[D, D], activations=[F.relu, None],
                        bn_decay=bn_decay)
         self.FC_2 = FC(input_dims=[D, D], units=[D, 1], activations=[F.relu, None],
                        bn_decay=bn_decay)
+        
 
     def forward(self, X, TE):
         # input
