@@ -44,10 +44,10 @@ with open(address, mode='r') as f:
         index = int(temp[0])
         SE[index] = torch.tensor([float(ch) for ch in temp[1:]])
 
-labels = equal_size_kmeans(SE, 65)
-check_type(labels)
-print(labels)
-print(labels.dtype)
+# labels = equal_size_kmeans(SE, 65)
+# check_type(labels)
+# print(labels)
+# print(labels.dtype)
 
 '''
 start_time = time.time()
