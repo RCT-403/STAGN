@@ -1,9 +1,9 @@
 import numpy as np
 
-def equal_size_kmeans(X, k, runs=2):
+def equal_size_kmeans(X, k, runs=3, spectral=0):
     points = X.shape[0]
     size = points / k
-    # Step 1: Initialize the centroids
+
     centroids = np.random.rand(k, X.shape[1])
 
     for _ in range(runs):
@@ -27,8 +27,13 @@ def equal_size_kmeans(X, k, runs=2):
                         cluster_assignments[excess_index] = m
                         cluster_sizes[m] += 1
                         break
-        
-        for i in range(k):
-            centroids[i] = np.mean(X[cluster_assignments == i].numpy(), axis = 0, keepdims= True)
+                        
+        if not spectral:
+            for i in range(k):
+                centroids[i] = np.mean(X[cluster_assignments == i].numpy(), axis = 0, keepdims= True)
+
+        else:
+            for i in range(k):
+                centroids[i] = np.mean(X[cluster_assignments == i], axis = 0, keepdims= True)
 
     return cluster_assignments

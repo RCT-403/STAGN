@@ -1,9 +1,9 @@
-time_slot=5, num_his=12, num_pred=12, L=1, K=8, d=8, train_ratio=0.05, val_ratio=0.05, test_ratio=0.05, batch_size=32, max_epoch=1, patience=2, learning_rate=0.001, decay_epoch=10, traffic_file='./data/pems-bay.h5', SE_file='./data/SE(PeMS)_52.txt', model_file='./data/GMAN.pkl', log_file='./data/log'
+time_slot=5, num_his=12, num_pred=12, L=1, K=8, d=8, train_ratio=0.01, val_ratio=0.01, test_ratio=0.01, batch_size=32, max_epoch=1, patience=2, learning_rate=0.001, decay_epoch=10, traffic_file='./data/pems-bay.h5', SE_file='./data/SE(PeMS)_52.txt', model_file='./data/GMAN.pkl', log_file='./data/log'
 loading data...
-trainX: torch.Size([2583, 12, 325])		 trainY: torch.Size([2583, 12, 325])
-valX:   torch.Size([46881, 12, 325])		valY:   torch.Size([46881, 12, 325])
-testX:   torch.Size([2583, 12, 325])		testY:   torch.Size([2583, 12, 325])
-mean:   63.1769		std:   8.1467
+trainX: torch.Size([498, 12, 325])		 trainY: torch.Size([498, 12, 325])
+valX:   torch.Size([51051, 12, 325])		valY:   torch.Size([51051, 12, 325])
+testX:   torch.Size([498, 12, 325])		testY:   torch.Size([498, 12, 325])
+mean:   65.5673		std:   6.2758
 data loaded!
 compiling model...
 trainable parameters: 187,463
