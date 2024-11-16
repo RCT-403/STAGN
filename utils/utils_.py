@@ -49,6 +49,7 @@ def load_data(args):
     val_steps = num_step - train_steps - test_steps
     train = traffic[: train_steps]
     val = traffic[train_steps: train_steps + val_steps]
+    # val = traffic[train_steps: train_steps + train_steps] # -- For Debugging
     test = traffic[-test_steps:]
     # X, Y
     trainX, trainY = seq2instance(train, args.num_his, args.num_pred)

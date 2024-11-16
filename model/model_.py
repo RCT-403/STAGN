@@ -7,6 +7,8 @@ from model.spectral import balanced_spectral_clustering
 
 
 def AddClusterTemporal(INPUT, grouping): # [256, 325, 12, 8] -> [256, 325, 60, 8]
+    batch_count = INPUT.shape[0]
+
     # arranged -> output helper
     count = {}
     back_to_normal = [] 
@@ -27,17 +29,17 @@ def AddClusterTemporal(INPUT, grouping): # [256, 325, 12, 8] -> [256, 325, 60, 8
     
     # Refer to archive/permute.ipynb
     # input -> arranged
-    for i in range(256):
+    for i in range(batch_count):
         INPUT[i] = INPUT[i][transform]
     
-    X = [torch.split(INPUT[i], 5, dim=0) for i in range(256)]
+    X = [torch.split(INPUT[i], 5, dim=0) for i in range(batch_count)]
     X = [list(split) for split in X]
-    X = [[t.reshape(-1, t.size(-1)) for t in X[i]] for i in range(256)]
-    X = [[t for t in X[i] for _ in range(5)] for i in range(256)]
+    X = [[t.reshape(-1, t.size(-1)) for t in X[i]] for i in range(batch_count)]
+    X = [[t for t in X[i] for _ in range(5)] for i in range(batch_count)]
     X = torch.stack([torch.stack(t) for t in X])
     
     # arranged -> output
-    for i in range(256):
+    for i in range(batch_count):
         X[i] = X[i][back_to_normal]
     
     return X

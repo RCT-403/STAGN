@@ -1,10 +1,38 @@
-time_slot=5, num_his=12, num_pred=12, L=1, K=8, d=8, train_ratio=0.01, val_ratio=0.01, test_ratio=0.01, batch_size=32, max_epoch=1, patience=2, learning_rate=0.001, decay_epoch=10, traffic_file='./data/pems-bay.h5', SE_file='./data/SE(PeMS)_52.txt', model_file='./data/GMAN.pkl', log_file='./data/log'
+time_slot=5, num_his=12, num_pred=12, L=1, K=8, d=8, train_ratio=0.0005, val_ratio=0.001, test_ratio=0.0005, batch_size=32, max_epoch=1, patience=2, learning_rate=0.001, decay_epoch=10, traffic_file='./data/pems-bay.h5', SE_file='./data/SE(PeMS)_52.txt', model_file='./data/GMAN.pkl', log_file='./data/log'
 loading data...
-trainX: torch.Size([498, 12, 325])		 trainY: torch.Size([498, 12, 325])
-valX:   torch.Size([51051, 12, 325])		valY:   torch.Size([51051, 12, 325])
-testX:   torch.Size([498, 12, 325])		testY:   torch.Size([498, 12, 325])
-mean:   65.5673		std:   6.2758
+trainX: torch.Size([3, 12, 325])		 trainY: torch.Size([3, 12, 325])
+valX:   torch.Size([3, 12, 325])		valY:   torch.Size([3, 12, 325])
+testX:   torch.Size([3, 12, 325])		testY:   torch.Size([3, 12, 325])
+mean:   68.0864		std:   1.5564
 data loaded!
 compiling model...
 trainable parameters: 187,463
 **** training model ****
+2024-11-16 23:31:06 | epoch: 0001/1, training time: 1.0s, inference time: 0.3s
+train loss: 6.6399, val_loss: 2.6438
+val loss decrease from inf to 2.6438, saving model to ./data/GMAN.pkl
+Training and validation are completed, and model has been stored as ./data/GMAN.pkl
+**** testing model ****
+loading model from ./data/GMAN.pkl
+model restored!
+evaluating...
+testing time: 0.3s
+                MAE		RMSE		MAPE
+train            1.02		1.53		1.52%
+val              1.08		1.63		1.60%
+test             2.07		3.00		3.22%
+performance in each prediction step
+step: 01         2.09		3.50		3.56%
+step: 02         2.03		3.04		3.16%
+step: 03         2.04		2.89		3.14%
+step: 04         2.09		2.96		3.22%
+step: 05         2.12		2.99		3.28%
+step: 06         2.12		3.00		3.28%
+step: 07         2.13		2.97		3.29%
+step: 08         2.09		2.94		3.22%
+step: 09         2.05		2.88		3.16%
+step: 10         2.03		2.89		3.12%
+step: 11         2.02		2.89		3.11%
+step: 12         2.03		2.94		3.14%
+average:         2.07		2.99		3.22%
+total time: 0.1min
