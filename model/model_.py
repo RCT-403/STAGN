@@ -12,7 +12,6 @@ def equal_size_kmeans(X, k):
     centroids = np.random.rand(k, X.shape[1])
 
     for _ in range(2):
-
         cluster_assignments = np.full(X.shape[0], -1) 
         cluster_sizes = np.zeros(k, dtype=int)
 
