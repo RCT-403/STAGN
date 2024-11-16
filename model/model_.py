@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from sklearn.decomposition import PCA
 import numpy as np
+
 
 def equal_size_kmeans(X, k):
     points = X.shape[0]
@@ -39,8 +39,8 @@ def equal_size_kmeans(X, k):
 
     return cluster_assignments
 
+
 def AddClusterTemporal(INPUT, grouping): # [256, 325, 12, 8] -> [256, 325, 60, 8]
-    
     # arranged -> output helper
     count = {}
     back_to_normal = [] 
@@ -59,11 +59,11 @@ def AddClusterTemporal(INPUT, grouping): # [256, 325, 12, 8] -> [256, 325, 60, 8
         indices = (grouping == number).nonzero(as_tuple=True)[0]
         transform.extend(indices.tolist())
     
+    # Refer to archive/permute.ipynb
     # input -> arranged
     for i in range(256):
         INPUT[i] = INPUT[i][transform]
     
-
     X = [torch.split(INPUT[i], 5, dim=0) for i in range(256)]
     X = [list(split) for split in X]
     X = [[t.reshape(-1, t.size(-1)) for t in X[i]] for i in range(256)]
@@ -75,6 +75,7 @@ def AddClusterTemporal(INPUT, grouping): # [256, 325, 12, 8] -> [256, 325, 60, 8
         X[i] = X[i][back_to_normal]
     
     return X
+
 
 class conv2d_(nn.Module):
     def __init__(self, input_dims, output_dims, kernel_size, stride=(1, 1),
