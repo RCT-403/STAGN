@@ -1,4 +1,13 @@
 import numpy as np
+from balanced_kmeans import kmeans_equal
+import torch
+
+def better_equal_size_kmeans(X, k, spectral=0):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    X = torch.tensor(X, device=device)
+
+    choices, centers = kmeans_equal(X, num_clusters=k, cluster_size=X//k)
+    return choices
 
 def equal_size_kmeans(X, k, runs=3, spectral=0):
     points = X.shape[0]
