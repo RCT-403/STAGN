@@ -11,4 +11,4 @@ def balanced_spectral_clustering(X, k, gamma=1.0):
     eigenvectors = np.array(eigenvectors)
 
     return equal_size_kmeans(eigenvectors[:, :k], k, spectral=1)
-    # return better_equal_size_kmeans(eigenvectors[:, :k], k, spectral=1)
+    # return better_equal_size_kmeans(eigenvectors[:, :k], k)
