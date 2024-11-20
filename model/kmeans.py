@@ -168,16 +168,13 @@ def kmeans_equal(
         initial_state_pre = initial_state.clone()
         for index in range(num_clusters):
             cluster_positions = torch.argmax((choices == index).to(torch.long), dim=-1)
-            # if(cluster_positions.ndim == 1):
-            #     cluster_positions.unsqueeze(0)
-            #     print("Hie")
-            #     print(cluster_positions.shape)
             selected_ind = torch.argsort(cluster_positions, dim=-1)[:, :cluster_size]
 
+            print("Hi", choices)
             choices.scatter_(1, selected_ind.unsqueeze(-1).repeat(1, 1, num_clusters), value=index)
-            # update cluster center
+            print("Hey", choices)
 
-
+            # update cluster centers
             if update_centers:
                 initial_state[:, index] = torch.gather(X, 1, selected_ind.unsqueeze(-1).repeat(1, 1, X.shape[-1])).mean(dim=-2)
 
@@ -185,7 +182,8 @@ def kmeans_equal(
         center_shift = torch.sum(
             torch.sqrt(
                 torch.sum((initial_state - initial_state_pre) ** 2, dim=1)
-            ))
+            )
+        )
 
         # increment iteration
         iteration = iteration + 1
