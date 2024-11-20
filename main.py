@@ -35,7 +35,7 @@ parser.add_argument('--batch_size', type=int, default=32,
                     help='batch size')
 parser.add_argument('--max_epoch', type=int, default=1,
                     help='epoch to run')
-parser.add_argument('--patience', type=int, default=2,
+parser.add_argument('--patience', type=int, default=10,
                     help='patience for early stop') # 10
 parser.add_argument('--learning_rate', type=float, default=0.001,
                     help='initial learning rate')
