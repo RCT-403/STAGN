@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 import numpy as np
-from model.spectral import balanced_spectral_clustering
+# from model.spectral import balanced_spectral_clustering
 
 
 def AddClusterTemporal(INPUT, grouping): # [256, 325, 12, 8] -> [256, 325, 60, 8]
@@ -251,8 +251,9 @@ class temporalAttention(nn.Module):
         key = key.permute(0, 2, 3, 1)
         value = value.permute(0, 2, 1, 3)
         
-        query = AddClusterTemporal(query, self.grouping) # [256, 325, 12, 8] -> [256, 325, 60, 8]
-        value = AddClusterTemporal(value, self.grouping) 
+        # query = AddClusterTemporal(query, self.grouping) # [256, 325, 12, 8] -> [256, 325, 60, 8]
+        # value = AddClusterTemporal(value, self.grouping) 
+        
         # We create a new key which concats 5 permutations of X
         # we get Q = [256, 325, 60, 8] and K = [256, 325, 8, 12]
         
@@ -411,7 +412,8 @@ class GMAN(nn.Module):
         d = args.d
         D = K * d
         
-        grouping = torch.from_numpy(balanced_spectral_clustering(SE, 65))
+        grouping = 0
+        # grouping = torch.from_numpy(balanced_spectral_clustering(SE, 65))
         
         self.num_his = args.num_his
         self.SE = SE
