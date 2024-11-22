@@ -317,9 +317,9 @@ class transformAttention(nn.Module):
         return X
 
 
-class GMAN(nn.Module):
+class STE_GMAN(nn.Module):
     '''
-    GMAN
+    STE_GMAN
         X：       [batch_size, num_his, num_vertx]
         TE：      [batch_size, num_his + num_pred, 2] (time-of-day, day-of-week)
         SE：      [num_vertex, K * d]
@@ -333,7 +333,7 @@ class GMAN(nn.Module):
     '''
 
     def __init__(self, SE, args, bn_decay):
-        super(GMAN, self).__init__()
+        super(STE_GMAN, self).__init__()
         L = args.L
         K = args.K
         d = args.d

@@ -22,12 +22,12 @@ def test(args, log):
     val_num_batch = math.ceil(num_val / args.batch_size)
     test_num_batch = math.ceil(num_test / args.batch_size)
 
-    model = torch.load(args.model_file)
+    model = torch.load(args.model_file, weights_only=False)
 
     # test model
     log_string(log, '**** testing model ****')
     log_string(log, 'loading model from %s' % args.model_file)
-    model = torch.load(args.model_file)
+    model = torch.load(args.model_file, weights_only=False)
     log_string(log, 'model restored!')
     log_string(log, 'evaluating...')
 
