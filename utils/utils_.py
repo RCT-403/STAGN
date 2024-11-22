@@ -48,9 +48,9 @@ def load_data(args):
     test_steps = round(args.test_ratio * num_step)
     val_steps = num_step - train_steps - test_steps
 
-    # train_steps = 2800
-    # test_steps = 800
-    # val_steps = 400 
+    # train_steps = 700
+    # test_steps = 200
+    # val_steps = 100
 
     train = traffic[: train_steps]
     val = traffic[train_steps: train_steps + val_steps]
@@ -134,7 +134,7 @@ def mae_loss(pred, label):
 
 
 # plot train_val_loss
-def plot_train_val_loss(train_total_loss, val_total_loss, train_file_path, val_file_path):
+def plot_train_val_loss(train_total_loss, val_total_loss, train_file_path, val_file_path, txt_file_path):
     plt.figure(figsize=(10, 5))
     plt.plot(range(1, len(train_total_loss) + 1), train_total_loss, c='b', marker='s', label='Train')
     plt.legend(loc='best')
@@ -146,6 +146,16 @@ def plot_train_val_loss(train_total_loss, val_total_loss, train_file_path, val_f
     plt.legend(loc='best')
     plt.title('Validation loss')
     plt.savefig(val_file_path)
+
+    # Step 2: Open a file in write mode
+    with open(txt_file_path, 'w') as file:
+        # Step 3: Write the first array to the file in one line
+        file.write('Train Total Loss: ' + ', '.join(f'{num:.4f}' for num in train_total_loss)+ '\n')
+        
+        # Step 4: Write the second array to the file in one line
+        file.write('Val Total Loss: ' + ', '.join(f'{num:.4f}' for num in val_total_loss) + '\n')
+
+    # The file is automatically closed after the with block
 
 
 # plot test results / NOT USED 

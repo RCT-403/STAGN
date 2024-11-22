@@ -71,11 +71,11 @@ class STEmbedding(nn.Module):
     def __init__(self, D, bn_decay):
         super(STEmbedding, self).__init__()
         self.FC_se = FC(
-            input_dims=[52, 52], units=[52, 52], activations=[F.relu, None],
+            input_dims=[D, D], units=[D, D], activations=[F.relu, None],
             bn_decay=bn_decay)
 
         self.FC_te = FC(
-            input_dims=[295, 12], units=[12, 12], activations=[F.relu, None],
+            input_dims=[295, D], units=[D, D], activations=[F.relu, None],
             bn_decay=bn_decay)  # input_dims = time step per day + days per week=288+7=295
 
     def forward(self, SE, TE, T=288):
@@ -93,17 +93,7 @@ class STEmbedding(nn.Module):
         TE = TE.unsqueeze(dim=2)
         TE = self.FC_te(TE)
         del dayofweek, timeofday
-
-        SE_expanded = SE.expand(TE.shape[0], 24, 325, 52)
-        TE_expanded = TE.expand(TE.shape[0], 24, 325, 12)
-        
-        # reshaped_tensor = torch.cat((SE_expanded, TE_expanded), dim=3).detach().view(-1, 128).numpy()
-        # pca = PCA(n_components=64)
-        # SEMan = pca.fit_transform(reshaped_tensor)
-        # SEMan = torch.from_numpy(SEMan).view(32, 24, 325, 64)
-        # return SEMan
-
-        return torch.cat((SE_expanded, TE_expanded), dim=3)
+        return SE + TE
 
 
 class spatialAttention(nn.Module):
@@ -317,7 +307,7 @@ class transformAttention(nn.Module):
         return X
 
 
-class GMAN(nn.Module):
+class OG_GMAN(nn.Module):
     '''
     GMAN
         X：       [batch_size, num_his, num_vertx]
@@ -333,7 +323,7 @@ class GMAN(nn.Module):
     '''
 
     def __init__(self, SE, args, bn_decay):
-        super(GMAN, self).__init__()
+        super(OG_GMAN, self).__init__()
         L = args.L
         K = args.K
         d = args.d
