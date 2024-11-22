@@ -48,7 +48,7 @@ parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
 parser.add_argument('--traffic_file', default='./data/pems-bay.h5',
                     help='traffic file')
-parser.add_argument('--SE_file', default='./data/SE(PeMS)_52.txt',  # CHANGE TO 64/52 DEPENDING ON WHAT YOUR TRAINING
+parser.add_argument('--SE_file', default='./data/SE(PeMS).txt',  # CHANGE TO 64/52 DEPENDING ON WHAT YOUR TRAINING
                     help='spatial embedding file')
 parser.add_argument('--model_file', default='./Results_Kmeans/model_parameters.pkl', # CHANGE TO WHATEVER FOLDER
                     help='save the model to disk')
