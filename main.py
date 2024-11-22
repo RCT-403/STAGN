@@ -8,7 +8,11 @@ import matplotlib.pyplot as plt
 from utils.utils_ import log_string, plot_train_val_loss
 from utils.utils_ import count_parameters, load_data
 
-from model.model_ import GMAN
+from model.GMAN_model import OG_GMAN
+from model.KMeans_model import KMeans_GMAN
+from model.STE_model import STE_GMAN
+from model.STAGN_model import STAGN
+
 from model.train import train
 from model.test import test
 
@@ -45,9 +49,9 @@ parser.add_argument('--traffic_file', default='./data/pems-bay.h5',
                     help='traffic file')
 parser.add_argument('--SE_file', default='./data/SE(PeMS)_52.txt',
                     help='spatial embedding file')
-parser.add_argument('--model_file', default='./data/GMAN.pkl',
+parser.add_argument('--model_file', default='./STE_results/GMAN_STE.pkl',
                     help='save the model to disk')
-parser.add_argument('--log_file', default='./data/log',
+parser.add_argument('--log_file', default='./STE_results/log_STE',
                     help='log file')
 args = parser.parse_args()
 log = open(args.log_file, 'w')
@@ -79,34 +83,37 @@ log_string(log, 'trainable parameters: {:,}'.format(parameters))
 if __name__ == '__main__':
     start = time.time()
     loss_train, loss_val = train(model, args, log, loss_criterion, optimizer, scheduler)
-    plot_train_val_loss(loss_train, loss_val, 'figure/train_val_loss.png')
+    plot_train_val_loss(loss_train, loss_val, 'STE_results/train_loss.png', 'STE_results/val_loss.png' )
     trainPred, valPred, testPred = test(args, log)
     end = time.time()
     log_string(log, 'total time: %.1fmin' % ((end - start) / 60))
-    log.close()
-    trainPred_ = trainPred.numpy().reshape(-1, trainY.shape[-1])
-    trainY_ = trainY.numpy().reshape(-1, trainY.shape[-1])
-    valPred_ = valPred.numpy().reshape(-1, valY.shape[-1])
-    valY_ = valY.numpy().reshape(-1, valY.shape[-1])
-    testPred_ = testPred.numpy().reshape(-1, testY.shape[-1])
-    testY_ = testY.numpy().reshape(-1, testY.shape[-1])
+    log.close() 
 
-    # Save training, validation and testing datas to disk
-    l = [trainPred_, trainY_, valPred_, valY_, testPred_, testY_]
-    name = ['trainPred', 'trainY', 'valPred', 'valY', 'testPred', 'testY']
-    for i, data in enumerate(l):
-        np.savetxt('./figure/' + name[i] + '.txt', data, fmt='%s')
-        
+    # THIS SAVES EACH OF THE DATA POINTS AND PLOTS THE ACCURACY OF EACH POINT TO ITS ACTUAL VALUE SO I DONT THINK WE NEED IT, ALL WE NEED IS THE RESULT OF TRAINING
+
+    # trainPred_ = trainPred.numpy().reshape(-1, trainY.shape[-1])
+    # trainY_ = trainY.numpy().reshape(-1, trainY.shape[-1])
+    # valPred_ = valPred.numpy().reshape(-1, valY.shape[-1])
+    # valY_ = valY.numpy().reshape(-1, valY.shape[-1])
+    # testPred_ = testPred.numpy().reshape(-1, testY.shape[-1])
+    # testY_ = testY.numpy().reshape(-1, testY.shape[-1])
+
+    # # Save training, validation and testing datas to disk
+    # l = [trainPred_, trainY_, valPred_, valY_, testPred_, testY_]
+    # name = ['trainPred', 'trainY', 'valPred', 'valY', 'testPred', 'testY']
+    # for i, data in enumerate(l):
+    #     np.savetxt('./figure/' + name[i] + '.txt', data, fmt='%s')
+    
     # Plot the test prediction vs target（optional)
-    plt.figure(figsize=(10, 280))
-    for k in range(325):
-        plt.subplot(325, 1, k + 1)
-        for j in range(len(testPred)):
-            c, d = [], []
-            for i in range(12):
-                c.append(testPred[j, i, k])
-                d.append(testY[j, i, k])
-            plt.plot(range(1 + j, 12 + 1 + j), c, c='b')
-            plt.plot(range(1 + j, 12 + 1 + j), d, c='r')
-    plt.title('Test prediction vs Target')
-    plt.savefig('./figure/test_results.png')
+    # plt.figure(figsize=(10, 280))
+    # for k in range(325):
+    #     plt.subplot(325, 1, k + 1)
+    #     for j in range(len(testPred)):
+    #         c, d = [], []
+    #         for i in range(12):
+    #             c.append(testPred[j, i, k])
+    #             d.append(testY[j, i, k])
+    #         plt.plot(range(1 + j, 12 + 1 + j), c, c='b')
+    #         plt.plot(range(1 + j, 12 + 1 + j), d, c='r')
+    # plt.title('Test prediction vs Target')
+    # plt.savefig('./figure/test_results.png')

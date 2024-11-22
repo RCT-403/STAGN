@@ -48,11 +48,12 @@ def load_data(args):
     test_steps = round(args.test_ratio * num_step)
     val_steps = num_step - train_steps - test_steps
 
-    
+    # train_steps = 2800
+    # test_steps = 800
+    # val_steps = 400 
 
     train = traffic[: train_steps]
     val = traffic[train_steps: train_steps + val_steps]
-    # val = traffic[train_steps: train_steps + train_steps] # -- For Debugging
     test = traffic[-test_steps:]
     # X, Y
     trainX, trainY = seq2instance(train, args.num_his, args.num_pred)
@@ -133,17 +134,22 @@ def mae_loss(pred, label):
 
 
 # plot train_val_loss
-def plot_train_val_loss(train_total_loss, val_total_loss, file_path):
+def plot_train_val_loss(train_total_loss, val_total_loss, train_file_path, val_file_path):
     plt.figure(figsize=(10, 5))
     plt.plot(range(1, len(train_total_loss) + 1), train_total_loss, c='b', marker='s', label='Train')
+    plt.legend(loc='best')
+    plt.title('Train loss')
+    plt.savefig(train_file_path)
+
+    plt.figure(figsize=(10, 5))
     plt.plot(range(1, len(val_total_loss) + 1), val_total_loss, c='r', marker='o', label='Validation')
     plt.legend(loc='best')
-    plt.title('Train loss vs Validation loss')
-    plt.savefig(file_path)
+    plt.title('Validation loss')
+    plt.savefig(val_file_path)
 
 
-# plot test results
+# plot test results / NOT USED 
 def save_test_result(trainPred, trainY, valPred, valY, testPred, testY):
-    with open('./figure/test_results.txt', 'w+') as f:
+    with open('./STE_results/test_results.txt', 'w+') as f:
         for l in (trainPred, trainY, valPred, valY, testPred, testY):
             f.write(list(l))

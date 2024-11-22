@@ -6,9 +6,10 @@ sys.path.insert(0, parent_dir)
 import time
 import datetime
 from utils.utils_ import log_string
-from model.model_ import *
+import torch
+import numpy as np
+import math
 from utils.utils_ import load_data
-
 
 def train(model, args, log, loss_criterion, optimizer, scheduler):
 
@@ -41,9 +42,14 @@ def train(model, args, log, loss_criterion, optimizer, scheduler):
         start_train = time.time()
         model.train()
         train_loss = 0
+        temp_loss = 0
         for batch_idx in range(train_num_batch):
             start_idx = batch_idx * args.batch_size
             end_idx = min(num_train, (batch_idx + 1) * args.batch_size)
+
+            if (num_train < (batch_idx + 1) * args.batch_size):
+                break
+            
             X = trainX[start_idx: end_idx]
             TE = trainTE[start_idx: end_idx]
             label = trainY[start_idx: end_idx]
@@ -52,15 +58,18 @@ def train(model, args, log, loss_criterion, optimizer, scheduler):
             pred = pred * std + mean
             loss_batch = loss_criterion(pred, label)
             train_loss += float(loss_batch) * (end_idx - start_idx)
+            temp_loss += float(loss_batch) * (end_idx - start_idx)
             loss_batch.backward()
             optimizer.step()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
             if (batch_idx+1) % 5 == 0:
                 print(f'Training batch: {batch_idx+1} in epoch:{epoch}, training batch loss:{loss_batch:.4f}')
+                temp_loss /= (5 * args.batch_size)
+                train_total_loss.append(temp_loss)
+                temp_loss = 0
             del X, TE, label, pred, loss_batch
         train_loss /= num_train
-        train_total_loss.append(train_loss)
         end_train = time.time()
 
         # val loss
@@ -71,6 +80,10 @@ def train(model, args, log, loss_criterion, optimizer, scheduler):
             for batch_idx in range(val_num_batch):
                 start_idx = batch_idx * args.batch_size
                 end_idx = min(num_val, (batch_idx + 1) * args.batch_size)
+
+                if (num_train < (batch_idx + 1) * args.batch_size):
+                    break
+
                 X = valX[start_idx: end_idx]
                 TE = valTE[start_idx: end_idx]
                 label = valY[start_idx: end_idx]
@@ -78,9 +91,11 @@ def train(model, args, log, loss_criterion, optimizer, scheduler):
                 pred = pred * std + mean
                 loss_batch = loss_criterion(pred, label)
                 val_loss += loss_batch * (end_idx - start_idx)
+                val_total_loss.append(float(loss_batch))
+
                 del X, TE, label, pred, loss_batch
+
         val_loss /= num_val
-        val_total_loss.append(val_loss)
         end_val = time.time()
         log_string(
             log,
@@ -99,7 +114,6 @@ def train(model, args, log, loss_criterion, optimizer, scheduler):
         else:
             wait += 1
         scheduler.step()
-
     model.load_state_dict(best_model_wts)
     torch.save(model, args.model_file)
     log_string(log, f'Training and validation are completed, and model has been stored as {args.model_file}')
