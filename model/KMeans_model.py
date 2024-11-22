@@ -5,43 +5,104 @@ import math
 import numpy as np
 
 
-def AddClusterTemporal(INPUT, grouping): # [256, 325, 12, 8] -> [256, 325, 60, 8]
+def AddClusterTemporal(INPUT): # [256, 325, 12, 8] -> [256, 325, 60, 8]
+    
     batch_count = INPUT.shape[0]
 
-    # arranged -> output helper
-    count = {}
-    back_to_normal = [] 
-    for index, value in enumerate(grouping):
-        if value.item() not in count:
-            count[value.item()] = 0
-            
-        count[value.item()] += 1
-        k = count[value.item()]  
-        new_value = 5 * (value.item() - 1) + k - 1
-        back_to_normal.append(new_value)
-        
-    # input -> arranged helper
-    transform = []
-    for number in range(65):
-        indices = (grouping == number).nonzero(as_tuple=True)[0]
-        transform.extend(indices.tolist())
-    
-    # Refer to archive/permute.ipynb
-    # input -> arranged
-    for i in range(batch_count):
-        INPUT[i] = INPUT[i][transform]
-    
     X = [torch.split(INPUT[i], 5, dim=0) for i in range(batch_count)]
     X = [list(split) for split in X]
     X = [[t.reshape(-1, t.size(-1)) for t in X[i]] for i in range(batch_count)]
     X = [[t for t in X[i] for _ in range(5)] for i in range(batch_count)]
     X = torch.stack([torch.stack(t) for t in X])
-    
-    # arranged -> output
-    for i in range(batch_count):
-        X[i] = X[i][back_to_normal]
-    
+
     return X
+
+    # OLD IN CASE WE NEED
+
+    # grouping = torch.tensor([
+    #         43, 48, 5, 5, 42, 1, 1, 42, 10, 10,
+    #         10, 60, 45, 45, 0, 32, 60, 44, 21, 61,
+    #         24, 61, 24, 12, 12, 12, 12, 12, 21, 34,
+    #         44, 51, 16, 34, 44, 44, 47, 34, 55, 41,
+    #         45, 51, 55, 55, 51, 36, 50, 23, 64, 9,
+    #         64, 57, 19, 30, 57, 19, 23, 50, 19, 60,
+    #         23, 50, 46, 40, 14, 63, 47, 56, 50, 14,
+    #         19, 55, 64, 60, 16, 49, 58, 41, 46, 2,
+    #         14, 34, 54, 50, 18, 47, 11, 60, 40, 40,
+    #         30, 47, 15, 51, 54, 11, 11, 63, 40, 0,
+    #         0, 47, 49, 39, 49, 37, 49, 18, 59, 15,
+    #         37, 2, 14, 0, 57, 61, 41, 40, 39, 59,
+    #         59, 57, 0, 54, 59, 17, 23, 37, 18, 56,
+    #         46, 34, 19, 4, 15, 4, 51, 39, 23, 56,
+    #         32, 63, 61, 9, 5, 36, 54, 39, 58, 7,
+    #         17, 27, 11, 38, 14, 22, 49, 4, 45, 15,
+    #         55, 11, 29, 8, 46, 39, 17, 7, 38, 32,
+    #         56, 9, 37, 53, 54, 64, 30, 32, 16, 32,
+    #         25, 2, 37, 43, 63, 46, 25, 18, 1, 16,
+    #         56, 61, 36, 64, 25, 33, 25, 25, 1, 15,
+    #         27, 7, 30, 48, 7, 17, 20, 22, 43, 6,
+    #         45, 4, 20, 9, 31, 28, 28, 59, 43, 42,
+    #         20, 22, 7, 18, 26, 22, 30, 58, 42, 20,
+    #         22, 10, 28, 29, 13, 20, 29, 9, 44, 28,
+    #         63, 13, 17, 13, 4, 29, 31, 31, 28, 29,
+    #         16, 24, 31, 26, 24, 53, 3, 53, 3, 62,
+    #         13, 43, 6, 57, 36, 62, 2, 1, 62, 13,
+    #         36, 8, 8, 26, 53, 53, 3, 21, 38, 24,
+    #         62, 62, 58, 35, 52, 3, 31, 52, 3, 33,
+    #         21, 35, 33, 35, 38, 41, 52, 26, 6, 6,
+    #         10, 21, 41, 38, 35, 26, 48, 27, 27, 48,
+    #         35, 6, 5, 27, 52, 8, 33, 48, 8, 52,
+    #         33, 2, 42, 5, 58
+    #     ])
+
+    # # input -> arranged helper
+    # transform = []
+    # for number in range(65):
+    #     indices = (grouping == number).nonzero(as_tuple=True)[0]
+    #     transform.extend(indices.tolist())
+
+    # # arranged -> output helper
+    # count = {}
+    # back_to_normal = [] 
+    # for index, value in enumerate(grouping):
+    #     if value.item() not in count:
+    #         count[value.item()] = 0
+            
+    #     count[value.item()] += 1
+    #     k = count[value.item()]  
+    #     new_value = 5 * (value.item() - 1) + k - 1
+    #     back_to_normal.append(new_value)
+    
+    # # Refer to archive/permute.ipynb
+    # # input -> arranged
+    # for i in range(batch_count):
+    #     INPUT[i] = INPUT[i][transform]
+    
+    # X = [torch.split(INPUT[i], 5, dim=0) for i in range(batch_count)]
+    # X = [list(split) for split in X]
+    # X = [[t.reshape(-1, t.size(-1)) for t in X[i]] for i in range(batch_count)]
+    # X = [[t for t in X[i] for _ in range(5)] for i in range(batch_count)]
+    # X = torch.stack([torch.stack(t) for t in X])
+
+    # # Create a new tensor of shape (325, 24, 8)
+    # new_X= torch.zeros(batch_count, 325, 24, 8)
+
+    # # Keep the first 12 slices the same
+    # new_X[:, :, :12, :] = X[:, :, :12, :]
+
+    # # Calculate the sums for the 13th to 24th slices
+    # for i in range(12, 24):
+    #     for j in range(4):
+    #         new_X[:, :, i, :] += X[:, :, i + 12 * j, :]
+    #     new_X[:, :, i, :] /= 4
+
+    # del X, INPUT
+
+    # # arranged -> output
+    # for i in range(batch_count):
+    #     new_X[i] = new_X[i][back_to_normal]
+    
+    # return new_X
 
 
 class conv2d_(nn.Module):
@@ -109,11 +170,11 @@ class STEmbedding(nn.Module):
     def __init__(self, D, bn_decay):
         super(STEmbedding, self).__init__()
         self.FC_se = FC(
-            input_dims=[52, 52], units=[52, 52], activations=[F.relu, None],
+            input_dims=[D, D], units=[D, D], activations=[F.relu, None],
             bn_decay=bn_decay)
 
         self.FC_te = FC(
-            input_dims=[295, 12], units=[12, 12], activations=[F.relu, None],
+            input_dims=[295, D], units=[D, D], activations=[F.relu, None],
             bn_decay=bn_decay)  # input_dims = time step per day + days per week=288+7=295
 
     def forward(self, SE, TE, T=288):
@@ -131,17 +192,7 @@ class STEmbedding(nn.Module):
         TE = TE.unsqueeze(dim=2)
         TE = self.FC_te(TE)
         del dayofweek, timeofday
-
-        SE_expanded = SE.expand(TE.shape[0], 24, 325, 52)
-        TE_expanded = TE.expand(TE.shape[0], 24, 325, 12)
-        
-        # reshaped_tensor = torch.cat((SE_expanded, TE_expanded), dim=3).detach().view(-1, 128).numpy()
-        # pca = PCA(n_components=64)
-        # SEMan = pca.fit_transform(reshaped_tensor)
-        # SEMan = torch.from_numpy(SEMan).view(32, 24, 325, 64)
-        # return SEMan
-
-        return torch.cat((SE_expanded, TE_expanded), dim=3)
+        return SE + TE
 
 
 class spatialAttention(nn.Module):
@@ -207,10 +258,9 @@ class temporalAttention(nn.Module):
     return: [batch_size, num_step, num_vertex, D]
     '''
 
-    def __init__(self, K, d, bn_decay, grouping, mask=True):
+    def __init__(self, K, d, bn_decay, mask=True):
         super(temporalAttention, self).__init__()
         D = K * d
-        self.grouping = grouping
         
         self.d = d
         self.K = K
@@ -250,8 +300,8 @@ class temporalAttention(nn.Module):
         key = key.permute(0, 2, 3, 1)
         value = value.permute(0, 2, 1, 3)
         
-        # query = AddClusterTemporal(query, self.grouping) # [256, 325, 12, 8] -> [256, 325, 60, 8]
-        # value = AddClusterTemporal(value, self.grouping) 
+        query = AddClusterTemporal(query) # [256, 325, 12, 8] -> [256, 325, 60, 8]
+        value = AddClusterTemporal(value) 
         
         # We create a new key which concats 5 permutations of X
         # we get Q = [256, 325, 60, 8] and K = [256, 325, 8, 12]
@@ -321,10 +371,10 @@ class gatedFusion(nn.Module):
 
 
 class STAttBlock(nn.Module):
-    def __init__(self, K, d, bn_decay, grouping, mask=False):
+    def __init__(self, K, d, bn_decay, mask=False):
         super(STAttBlock, self).__init__()
         self.spatialAttention = spatialAttention(K, d, bn_decay)
-        self.temporalAttention = temporalAttention(K, d, bn_decay, grouping, mask=mask)
+        self.temporalAttention = temporalAttention(K, d, bn_decay, mask=mask)
         self.gatedFusion = gatedFusion(K * d, bn_decay)
 
     def forward(self, X, STE):
@@ -411,14 +461,11 @@ class KMeans_GMAN(nn.Module):
         d = args.d
         D = K * d
         
-        grouping = 0
-        # grouping = torch.from_numpy(balanced_spectral_clustering(SE, 65))
-        
         self.num_his = args.num_his
         self.SE = SE
         self.STEmbedding = STEmbedding(D, bn_decay)
-        self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay, grouping) for _ in range(L)])
-        self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay, grouping) for _ in range(L)])
+        self.STAttBlock_1 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
+        self.STAttBlock_2 = nn.ModuleList([STAttBlock(K, d, bn_decay) for _ in range(L)])
         self.transformAttention = transformAttention(K, d, bn_decay)
         self.FC_1 = FC(input_dims=[1, D], units=[D, D], activations=[F.relu, None],
                        bn_decay=bn_decay)

@@ -39,18 +39,55 @@ def seq2instance(data, num_his, num_pred):
 
 
 def load_data(args):
+
+    transform = [
+        14, 99, 100, 113, 122, 5, 6, 188, 198, 267, 79, 111,
+        181, 266, 321, 256, 258, 276, 285, 288, 133, 135, 157, 211,
+        244, 2, 3, 144, 312, 323, 209, 262, 298, 299, 311, 149,
+        167, 201, 204, 222, 163, 271, 272, 315, 318, 49, 143, 171,
+        213, 237, 8, 9, 10, 231, 300, 86, 95, 96, 152, 161,
+        23, 24, 25, 26, 27, 234, 241, 243, 260, 269, 64, 69,
+        80, 112, 154, 92, 109, 134, 159, 199, 32, 74, 178, 189,
+        250, 125, 150, 166, 205, 242, 84, 107, 128, 187, 223, 52,
+        55, 58, 70, 132, 206, 212, 220, 229, 235, 18, 28, 277,
+        290, 301, 155, 207, 221, 225, 230, 47, 56, 60, 126, 138,
+        20, 22, 251, 254, 279, 180, 186, 194, 196, 197, 224, 253,
+        273, 297, 305, 151, 200, 307, 308, 313, 215, 216, 232, 239,
+        248, 162, 233, 236, 245, 249, 53, 90, 176, 202, 226, 214,
+        246, 247, 252, 286, 15, 140, 169, 177, 179, 195, 289, 292,
+        316, 320, 29, 33, 37, 81, 131, 283, 291, 293, 304, 310,
+        45, 145, 192, 264, 270, 105, 110, 127, 172, 182, 153, 168,
+        278, 294, 303, 103, 118, 137, 147, 165, 63, 88, 89, 98,
+        117, 39, 77, 116, 295, 302, 4, 7, 219, 228, 322, 0,
+        183, 208, 218, 261, 17, 30, 34, 35, 238, 12, 13, 40,
+        158, 210, 62, 78, 130, 164, 185, 36, 66, 85, 91, 101,
+        1, 203, 306, 309, 317, 75, 102, 104, 106, 156, 46, 57,
+        61, 68, 83, 31, 41, 44, 93, 136, 284, 287, 296, 314,
+        319, 173, 255, 257, 274, 275, 82, 94, 123, 146, 174, 38,
+        42, 43, 71, 160, 67, 129, 139, 170, 190, 51, 54, 114,
+        121, 263, 76, 148, 227, 282, 324, 108, 119, 120, 124,
+        217, 11, 16, 59, 73, 87, 19, 21, 115, 142, 191, 259,
+        265, 268, 280, 281, 65, 97, 141, 184, 240, 48, 50, 72,
+        175, 193
+    ]
+
     # Traffic
     df = pd.read_hdf(args.traffic_file)
     traffic = torch.from_numpy(df.values)
+    
+    indices = torch.tensor(transform, dtype=torch.long)
+    valid_indices = indices[indices < 325]
+    traffic = traffic[:, valid_indices] 
+    
     # train/val/test
     num_step = df.shape[0]
     train_steps = round(args.train_ratio * num_step)
     test_steps = round(args.test_ratio * num_step)
     val_steps = num_step - train_steps - test_steps
 
-    # train_steps = 700
-    # test_steps = 200
-    # val_steps = 100
+    train_steps = 350
+    test_steps = 100
+    val_steps = 50
 
     train = traffic[: train_steps]
     val = traffic[train_steps: train_steps + val_steps]
@@ -76,7 +113,7 @@ def load_data(args):
             temp = line.split(' ')
             index = int(temp[0])
             SE[index] = torch.tensor([float(ch) for ch in temp[1:]])
-    
+        SE = SE[valid_indices] 
     # SE changes the order of the nodes based on the first col in SE(PeMS)
 
     # temporal embedding

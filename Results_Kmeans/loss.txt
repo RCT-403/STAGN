@@ -1,0 +1,2 @@
+Train Total Loss: 10.1656, 3.4124
+Val Total Loss: 126.0633
