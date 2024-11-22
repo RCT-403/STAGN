@@ -6,9 +6,10 @@ sys.path.insert(0, parent_dir)
 import time
 import datetime
 from utils.utils_ import log_string
-from model.model_ import *
+import torch
+import numpy as np
+import math
 from utils.utils_ import load_data
-
 
 def train(model, args, log, loss_criterion, optimizer, scheduler):
 

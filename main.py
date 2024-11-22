@@ -8,7 +8,11 @@ import matplotlib.pyplot as plt
 from utils.utils_ import log_string, plot_train_val_loss
 from utils.utils_ import count_parameters, load_data
 
-from model.model_ import GMAN
+from model.GMAN_model import OG_GMAN
+from model.KMeans_model import KMeans_GMAN
+from model.STE_model import STE_GMAN
+from model.STAGN_model import STAGN
+
 from model.train import train
 from model.test import test
 
