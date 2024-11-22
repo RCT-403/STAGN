@@ -148,7 +148,7 @@ def plot_train_val_loss(train_total_loss, val_total_loss, train_file_path, val_f
     plt.savefig(val_file_path)
 
 
-# plot test results
+# plot test results / NOT USED 
 def save_test_result(trainPred, trainY, valPred, valY, testPred, testY):
     with open('./STE_results/test_results.txt', 'w+') as f:
         for l in (trainPred, trainY, valPred, valY, testPred, testY):
