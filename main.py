@@ -16,6 +16,7 @@ from model.STAGN_model import STAGN
 from model.train import train
 from model.test import test
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--time_slot', type=int, default=5,
                     help='a time step is 5 mins')
