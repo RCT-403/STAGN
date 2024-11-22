@@ -1,38 +1,38 @@
 time_slot=5, num_his=12, num_pred=12, L=1, K=8, d=8, train_ratio=0.7, val_ratio=0.1, test_ratio=0.2, batch_size=32, max_epoch=1, patience=10, learning_rate=0.001, decay_epoch=10, traffic_file='./data/pems-bay.h5', SE_file='./data/SE(PeMS).txt', model_file='./Results_GMAN/GMAN_STE.pkl', log_file='./Results_GMAN/log_STE'
 loading data...
-trainX: torch.Size([677, 12, 325])		 trainY: torch.Size([677, 12, 325])
-valX:   torch.Size([77, 12, 325])		valY:   torch.Size([77, 12, 325])
-testX:   torch.Size([177, 12, 325])		testY:   torch.Size([177, 12, 325])
-mean:   65.5010		std:   6.5073
+trainX: torch.Size([36458, 12, 325])		 trainY: torch.Size([36458, 12, 325])
+valX:   torch.Size([5189, 12, 325])		valY:   torch.Size([5189, 12, 325])
+testX:   torch.Size([10400, 12, 325])		testY:   torch.Size([10400, 12, 325])
+mean:   62.7354		std:   9.4388
 data loaded!
 compiling model...
 trainable parameters: 209,923
 **** training model ****
-2024-11-22 14:49:20 | epoch: 0001/1, training time: 129.3s, inference time: 5.3s
-train loss: 27.9956, val_loss: 153.3520
-val loss decrease from inf to 153.3520, saving model to ./Results_GMAN/GMAN_STE.pkl
+2024-11-22 16:55:57 | epoch: 0001/1, training time: 7030.6s, inference time: 364.6s
+train loss: 22.9611, val_loss: 19.5181
+val loss decrease from inf to 19.5181, saving model to ./Results_GMAN/GMAN_STE.pkl
 Training and validation are completed, and model has been stored as ./Results_GMAN/GMAN_STE.pkl
 **** testing model ****
 loading model from ./Results_GMAN/GMAN_STE.pkl
 model restored!
 evaluating...
-testing time: 13.1s
+testing time: 775.1s
                 MAE		RMSE		MAPE
-train            2.58		5.23		5.43%
-val              7.51		12.38		24.35%
-test             5.15		9.06		13.79%
+train            2.00		3.96		nan%
+val              2.17		4.38		nan%
+test             2.05		4.14		nan%
 performance in each prediction step
-step: 01         5.07		8.70		13.48%
-step: 02         5.08		8.78		13.54%
-step: 03         5.10		8.85		13.61%
-step: 04         5.12		8.92		13.67%
-step: 05         5.14		8.99		13.74%
-step: 06         5.15		9.05		13.79%
-step: 07         5.16		9.11		13.84%
-step: 08         5.17		9.16		13.88%
-step: 09         5.19		9.21		13.92%
-step: 10         5.20		9.26		13.96%
-step: 11         5.22		9.32		14.01%
-step: 12         5.24		9.37		14.06%
-average:         5.15		9.06		13.79%
-total time: 3.4min
+step: 01         1.60		3.04		nan%
+step: 02         1.71		3.30		nan%
+step: 03         1.81		3.55		nan%
+step: 04         1.90		3.77		nan%
+step: 05         1.97		3.96		nan%
+step: 06         2.05		4.13		nan%
+step: 07         2.11		4.28		nan%
+step: 08         2.18		4.41		nan%
+step: 09         2.24		4.53		nan%
+step: 10         2.29		4.64		nan%
+step: 11         2.35		4.75		nan%
+step: 12         2.41		4.86		nan%
+average:         2.05		4.10		nan%
+total time: 187.0min
