@@ -67,6 +67,7 @@ class STEmbedding(nn.Module):
     D:      output dims
     return: [batch_size, num_his + num_pred, num_vertex, D]
     '''
+    
 
     def __init__(self, D, bn_decay):
         super(STEmbedding, self).__init__()
