@@ -449,9 +449,9 @@ class transformAttention(nn.Module):
         return X
 
 
-class KMeans_GMAN(nn.Module):
+class STAGN(nn.Module):
     '''
-    KMeans_GMAN
+    STAGN
         X：       [batch_size, num_his, num_vertx]
         TE：      [batch_size, num_his + num_pred, 2] (time-of-day, day-of-week)
         SE：      [num_vertex, K * d]
@@ -465,7 +465,7 @@ class KMeans_GMAN(nn.Module):
     '''
 
     def __init__(self, SE, args, bn_decay):
-        super(KMeans_GMAN, self).__init__()
+        super(STAGN, self).__init__()
         L = args.L
         K = args.K
         d = args.d
