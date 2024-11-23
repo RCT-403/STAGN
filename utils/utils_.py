@@ -85,9 +85,9 @@ def load_data(args):
     test_steps = round(args.test_ratio * num_step)
     val_steps = num_step - train_steps - test_steps
 
-    train_steps = 350
-    test_steps = 100
-    val_steps = 50
+    # train_steps = 350
+    # test_steps = 100
+    # val_steps = 50
 
     train = traffic[: train_steps]
     val = traffic[train_steps: train_steps + val_steps]
