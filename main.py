@@ -48,11 +48,11 @@ parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
 parser.add_argument('--traffic_file', default='./data/pems-bay.h5',
                     help='traffic file')
-parser.add_argument('--SE_file', default='./data/SE(PeMS).txt',  # CHANGE TO 64/52 DEPENDING ON WHAT YOUR TRAINING
+parser.add_argument('--SE_file', default='./data/SE(PeMS)_52.txt',  # CHANGE TO 64/52 DEPENDING ON WHAT YOUR TRAINING
                     help='spatial embedding file')
-parser.add_argument('--model_file', default='./Results_Kmeans/model_parameters.pkl', # CHANGE TO WHATEVER FOLDER
+parser.add_argument('--model_file', default='./Results_STAGN/model_parameters.pkl', # CHANGE TO WHATEVER FOLDER
                     help='save the model to disk')
-parser.add_argument('--log_file', default='./Results_Kmeans/log', # CHANGE TO WHATEVER FOLDER
+parser.add_argument('--log_file', default='./Results_STAGN/log', # CHANGE TO WHATEVER FOLDER
                     help='log file')
 args = parser.parse_args()
 log = open(args.log_file, 'w')
@@ -71,7 +71,7 @@ del trainX, trainTE, valX, valTE, testX, testTE, mean, std
 # build model
 log_string(log, 'compiling model...')
 
-model = KMeans_GMAN(SE, args, bn_decay=0.1)
+model = STAGN(SE, args, bn_decay=0.1)
 loss_criterion = nn.MSELoss()
 
 optimizer = optim.Adam(model.parameters(), args.learning_rate)
@@ -84,7 +84,7 @@ log_string(log, 'trainable parameters: {:,}'.format(parameters))
 if __name__ == '__main__':
     start = time.time()
     loss_train, loss_val = train(model, args, log, loss_criterion, optimizer, scheduler)
-    plot_train_val_loss(loss_train, loss_val, 'Results_Kmeans/train_loss.png', 'Results_Kmeans/val_loss.png', "Results_Kmeans/loss.txt" ) # CHANGE TO WHATEVER FOLDER
+    plot_train_val_loss(loss_train, loss_val, 'Results_STAGN/train_loss.png', 'Results_STAGN/val_loss.png', "Results_STAGN/loss.txt" ) # CHANGE TO WHATEVER FOLDER
     trainPred, valPred, testPred = test(args, log)
     end = time.time()
     log_string(log, 'total time: %.1fmin' % ((end - start) / 60))
