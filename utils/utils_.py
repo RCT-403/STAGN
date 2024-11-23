@@ -78,7 +78,7 @@ def load_data(args):
     indices = torch.tensor(transform, dtype=torch.long)
     valid_indices = indices[indices < 325]
     traffic = traffic[:, valid_indices] 
-    
+
     # train/val/test
     num_step = df.shape[0]
     train_steps = round(args.train_ratio * num_step)
