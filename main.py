@@ -48,11 +48,11 @@ parser.add_argument('--decay_epoch', type=int, default=10,
                     help='decay epoch')
 parser.add_argument('--traffic_file', default='./data/pems-bay.h5',
                     help='traffic file')
-parser.add_argument('--SE_file', default='./data/SE(PeMS).txt',  # CHANGE TO 64/52 DEPENDING ON WHAT YOUR TRAINING
+parser.add_argument('--SE_file', default='./data/SE(PeMS)_52.txt',  # CHANGE TO 64/52 DEPENDING ON WHAT YOUR TRAINING
                     help='spatial embedding file')
-parser.add_argument('--model_file', default='./Results_STAGN/model_parameters.pkl', # CHANGE TO WHATEVER FOLDER
+parser.add_argument('--model_file', default='./Results_STAGN/model_parameters3.pkl', # CHANGE TO WHATEVER FOLDER
                     help='save the model to disk')
-parser.add_argument('--log_file', default='./Results_STAGN/log', # CHANGE TO WHATEVER FOLDER
+parser.add_argument('--log_file', default='./Results_STAGN/log3', # CHANGE TO WHATEVER FOLDER
                     help='log file')
 args = parser.parse_args()
 log = open(args.log_file, 'w')
@@ -84,7 +84,7 @@ log_string(log, 'trainable parameters: {:,}'.format(parameters))
 if __name__ == '__main__':
     start = time.time()
     loss_train, loss_val = train(model, args, log, loss_criterion, optimizer, scheduler)
-    plot_train_val_loss(loss_train, loss_val, 'Results_STAGN/train_loss.png', 'Results_STAGN/val_loss.png', "Results_STAGN/loss.txt" ) # CHANGE TO WHATEVER FOLDER
+    plot_train_val_loss(loss_train, loss_val, 'Results_STAGN/train_loss3.png', 'Results_STAGN/val_loss3.png', "Results_STAGN/loss3.txt" ) # CHANGE TO WHATEVER FOLDER
     trainPred, valPred, testPred = test(args, log)
     end = time.time()
     log_string(log, 'total time: %.1fmin' % ((end - start) / 60))
